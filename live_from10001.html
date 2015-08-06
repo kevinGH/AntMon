@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+</head>
+<body>
+    <canvas id="output" width="640" height="480" style="z-index: 100; position:absolute;"></canvas>
+    <canvas id="subtitle" width="640" height="480" style="z-index: 101; position:absolute;"></canvas>
+    <script>
+        var output, ctx;
+        var subtitle, ctxSubTitle;
+        var ws = new WebSocket('ws://localhost:10001');
+
+        ws.onopen = function () {
+            // Web Socket is connected, send data using send()
+            ws.send("Message to send");
+            console.log("Message is sent...");
+        };
+
+        ws.onmessage = function (msg) {
+            data = JSON.parse(msg.data);
+            var frame = new Image();            
+            frame.src = "data:image/jpg;base64," + data.Img;
+            frame.onload = function () {
+                // draw image
+                ctx.drawImage(frame, 0, 0, 320, 240);
+
+                // convert cameraDate
+                var d = new Date(data.UTCTime + data.TimezoneOffset * 60000);
+                d.setHours(d.getHours() - (d.getTimezoneOffset() / 60));
+
+                // draw time
+                ctxSubTitle.clearRect(0, 0, 320, 240);
+                ctxSubTitle.fillStyle = "red";
+                ctxSubTitle.fillText("motion " + data.Motion, 0, 228);
+                ctxSubTitle.fillStyle = "white";
+                ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 240);
+                //drawText();
+            };
+
+            //ws.close();
+        };
+
+        ws.onclose = function () {
+            // websocket is closed.
+            console.log("Connection is closed...");
+        };
+
+        $(document).ready(function () {
+            output = document.getElementById("output");
+            subtitle = document.getElementById("subtitle");
+            ctx = output.getContext("2d");
+            ctxSubTitle = subtitle.getContext("2d");
+            ctxSubTitle.font = "20px arial";
+            ctxSubTitle.fillStyle = "white";
+            //ctxSubTitle.shadowOffsetX = 2;
+            //ctxSubTitle.shadowOffsetY = 2;
+            //ctxSubTitle.shadowBlur = 2;
+            //ctxSubTitle.shadowColor = "rgba(0, 0, 0, 0.5)";
+
+        });
+    </script>
+</body>
+</html>

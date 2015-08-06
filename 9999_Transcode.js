@@ -11,12 +11,13 @@ var PNG_HEADER_BUF = new Buffer([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
     JPEG_HEADER_STRING = JPEG_HEADER_BUF.toString('binary'),
     IMAGEHEADER = JPEG_HEADER_STRING;
 
-
+var meanLengthDiffSum = 0, v = 0, sum = 0, max = 0, mean = 0, min = 10000000, total = 0, lastJitter = 0, Jitter = 0, differLenth = 0, lastFileLength = 0, FileLength = 0, motionFlag = 0;
+var util = require('util');
 
 
 ffmpeg.stdout.on('data', function (data) {
     //console.log(new Date());
-    if (wss.clients.length > 0) {
+    if (wss.clients.length > 0) { // 有人連進來才處理
         buffer += data.toString('binary');
 
         // trim to header
@@ -29,13 +30,28 @@ ffmpeg.stdout.on('data', function (data) {
         if (contentList.length > 2) {
             var fileContents = new Buffer(IMAGEHEADER + contentList[1], 'binary');
             var now = new Date();
+
+            // motion detection
+            var FileLength = fileContents.length;
+            counter++;
+            differLenth = FileLength - lastFileLength;
+            Jitter = (lastJitter) * 99 / 100 + Math.abs(differLenth) / 100;
+
+            if (Jitter > lastJitter)
+                motionFlag++;
+            else if (motionFlag > 0)
+                motionFlag--;
+           
+
             // websocket broadcast
-            wss.broadcast(fileContents, now.getTime(), now.getTimezoneOffset());
+            wss.broadcast(fileContents, now.getTime(), now.getTimezoneOffset(), motionFlag);
 
             buffer = IMAGEHEADER + contentList.slice(2).join(IMAGEHEADER);
+            
 
-            console.log(counter);
-            counter++;
+            console.log(util.format('count=%d, FileLength=%d, jitter=%d, %d', counter, FileLength, Jitter, motionFlag));
+            lastFileLength = FileLength;
+            lastJitter = Jitter;
         }
     }
 });
@@ -57,15 +73,18 @@ wss.on('connection', function connection(ws) {
         console.log('stderr: ' + edata);
     });
 });
-wss.broadcast = function broadcast(data, timestamp, timezoneOffet) {
-    
+wss.broadcast = function broadcast(data, timestamp, timezoneOffet, motionValue) {
     var msg = {
         UTCTime: timestamp,
         TimezoneOffset: timezoneOffet,
-        Img: data.toString('base64')
+        //Img: data.toString('base64')
+        Img: data,
+        Motion: motionValue
     };
+    sendString = JSON.stringify(msg);
+    
     wss.clients.forEach(function each(client) {
-        client.send(JSON.stringify(msg), function ack(error) {
+        client.send(sendString, function ack(error) {
             if (error)
                 console.log(error);
         });

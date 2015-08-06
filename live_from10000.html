@@ -10,7 +10,7 @@
     <script>
         var output, ctx;
         var subtitle, ctxSubTitle;
-        var ws = new WebSocket('ws://localhost:9999');
+        var ws = new WebSocket('ws://localhost:10000');
 
         ws.onopen = function () {
             // Web Socket is connected, send data using send()
@@ -21,7 +21,6 @@
         ws.onmessage = function (msg) {
             data = JSON.parse(msg.data);
             var frame = new Image();            
-
             frame.src = "data:image/jpg;base64," + data.Img;
             frame.onload = function () {
                 // draw image
@@ -33,6 +32,9 @@
 
                 // draw time
                 ctxSubTitle.clearRect(0, 0, 640, 480);
+                ctxSubTitle.fillStyle = "red";
+                ctxSubTitle.fillText("motion " + data.Motion, 0, 455);
+                ctxSubTitle.fillStyle = "white";
                 ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 480);
                 //drawText();
             };
@@ -52,6 +54,10 @@
             ctxSubTitle = subtitle.getContext("2d");
             ctxSubTitle.font = "20px arial";
             ctxSubTitle.fillStyle = "white";
+            //ctxSubTitle.shadowOffsetX = 2;
+            //ctxSubTitle.shadowOffsetY = 2;
+            //ctxSubTitle.shadowBlur = 2;
+            //ctxSubTitle.shadowColor = "rgba(0, 0, 0, 0.5)";
 
         });
     </script>
