@@ -14,7 +14,7 @@
 
         ws.onopen = function () {
             // Web Socket is connected, send data using send()
-            ws.send("Message to send");
+            //ws.send("Message to send");
             console.log("Message is sent...");
         };
 
@@ -36,7 +36,10 @@
                 ctxSubTitle.fillText("motion " + data.Motion, 0, 455);
                 ctxSubTitle.fillStyle = "white";
                 ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 480);
-                //drawText();
+                
+
+                // feedback drawtime
+                ws.send(data.UTCTime);
             };
 
             //ws.close();

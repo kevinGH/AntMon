@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>full</title>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="output" style="z-index: 100; position:absolute;"></canvas>
+    <canvas id="subtitle" style="z-index: 101; position:absolute;"></canvas>
+    <script>
+        var output, ctx;
+        var subtitle, ctxSubTitle;
+        var ws = new WebSocket('ws://10.144.183.151:10005');
+        var fps = 9;
+        var buffer = [];
+        var bufferLimit = fps * 10;
+        var isPlay = false;
+        var upSizeCount = 0;
+        var drawFrameT, adaptiveCheckT;
+        
+        ws.onopen = function () {
+            // Web Socket is connected, send data using send()
+            //ws.send("Message to send");
+            console.log("Message is sent...");
+        };
+
+        ws.onmessage = function (msg) {
+            data = JSON.parse(msg.data);
+
+            buffer.push(data);
+            
+            //ws.close();
+        };
+
+        ws.onclose = function () {
+            // websocket is closed.
+            console.log("Connection is closed...");
+        };
+
+        $(document).ready(function () {
+            output = document.getElementById("output");
+            subtitle = document.getElementById("subtitle");
+            ctx = output.getContext("2d");
+            ctxSubTitle = subtitle.getContext("2d");
+            
+            $(window).resize(responseCanvas);
+
+            responseCanvas();
+
+            setTimeout("drawFrame()", 1);
+            setTimeout("checkResize()", 5000);
+        });
+
+        function checkResize() {
+            if (ws.readyState === 1) {
+                var w = window.innerWidth;
+                var h = window.innerHeight;
+
+                if (w <= 320) {
+                    ws.send("wearables");
+                }
+                else if (w <= 640) {
+                    ws.send("phones");
+                }
+                else if (w <= 1024) {
+                    ws.send("tablets");
+                }
+                else {
+                    ws.send("laptops");
+                }
+            }
+
+            setTimeout("checkResize()", 5000);
+        }
+        function responseCanvas() {
+            var w = window.innerWidth;
+            var h = window.innerHeight;
+            ctx.canvas.width = w;
+            ctx.canvas.height = h;
+            ctxSubTitle.canvas.width = w;
+            ctxSubTitle.canvas.height = h;
+            ctxSubTitle.font = "20px arial";
+            ctxSubTitle.fillStyle = "white";
+            //ctxSubTitle.shadowOffsetX = 2;
+            //ctxSubTitle.shadowOffsetY = 2;
+            //ctxSubTitle.shadowBlur = 2;
+            //ctxSubTitle.shadowColor = "rgba(0, 0, 0, 0.5)";
+
+            
+           
+        }
+        function drawFrame() {
+            if (buffer.length > 0) {
+                var data = buffer.pop();
+                var frame = new Image();
+                frame.src = "data:image/jpg;base64," + data.Img;
+                frame.onload = function () {
+                    // draw image
+                    ctx.drawImage(frame, 0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                    // convert cameraDate
+                    var d = new Date(data.UTCTime + data.TimezoneOffset * 60000);
+                    d.setHours(d.getHours() - (d.getTimezoneOffset() / 60));
+
+                    // draw time
+                    ctxSubTitle.clearRect(0, 0, ctxSubTitle.canvas.width, ctxSubTitle.canvas.height);
+                    ctxSubTitle.fillStyle = "red";
+                    ctxSubTitle.fillText("motion " + data.Motion, 0, ctxSubTitle.canvas.height - 40);
+                    ctxSubTitle.fillStyle = "white";
+                    ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, ctx.canvas.height);
+                };
+
+                
+                
+            }
+            setTimeout("drawFrame()", 1);
+            
+        }
+
+        function adaptiveCheck() {
+            if (buffer.length < (fps / 2)) {
+                ws.send("downsize");
+                clearTimeout(adaptiveCheckT);
+                setTimeout("adaptiveCheck()", 3000);
+                upSizeCount = 0;
+            }
+            else {
+                upSizeCount++;
+                if (upSizeCount > 3) {
+                    ws.send("upsize");
+                    clearTimeout(adaptiveCheckT);
+                    setTimeout("adaptiveCheck()", 3000);
+                }
+                    
+            }
+        }
+    </script>
+</body>
+</html>

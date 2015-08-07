@@ -1,8 +1,9 @@
 var WebSocket = require('ws'),
     WebSocketServer = require('ws').Server;
 var wsSource = new WebSocket('ws://localhost:9999');
-var wsServer = new WebSocketServer({ port: 10001 });
-var gm = require('gm');
+var wsServer = new WebSocketServer({ port: 10004 });
+
+
 
 wsSource.on('open', function open() {
     
@@ -11,13 +12,13 @@ wsSource.on('open', function open() {
 wsSource.on('message', function (data, flags) {
     if (wsServer.clients.length > 0) { // 有人連進來才處理
         msg = JSON.parse(data);
-        var buf = new Buffer(msg.Img);
-        gm(buf).resize(320, 240).toBuffer('JPG', function (err, buffer) {
-            msg.Img = buffer;
-            wsServer.broadcast(JSON.stringify(msg));
-            console.log(msg.UTCTime);
-        });
-        
+        if (msg.Motion > 1) // 有motion才送出去
+            msg.Img = new Buffer(msg.Img).toString('base64');
+        else
+            msg.Img = "";
+                
+        wsServer.broadcast(JSON.stringify(msg));
+        console.log(msg.UTCTime);
     }
 });
 

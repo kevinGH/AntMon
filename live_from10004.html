@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>full</title>
+    <title>dropframebymotion</title>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 </head>
 <body>
@@ -10,7 +10,7 @@
     <script>
         var output, ctx;
         var subtitle, ctxSubTitle;
-        var ws = new WebSocket('ws://localhost:10000');
+        var ws = new WebSocket('ws://localhost:10004');
 
         ws.onopen = function () {
             // Web Socket is connected, send data using send()
@@ -20,12 +20,27 @@
 
         ws.onmessage = function (msg) {
             data = JSON.parse(msg.data);
-            var frame = new Image();            
-            frame.src = "data:image/jpg;base64," + data.Img;
-            frame.onload = function () {
-                // draw image
-                ctx.drawImage(frame, 0, 0, 640, 480);
+            if (data.Img.length > 0) {
+                var frame = new Image();
+                frame.src = "data:image/jpg;base64," + data.Img;
+                frame.onload = function () {
+                    // draw image
+                    ctx.drawImage(frame, 0, 0, 640, 480);
 
+                    // convert cameraDate
+                    var d = new Date(data.UTCTime + data.TimezoneOffset * 60000);
+                    d.setHours(d.getHours() - (d.getTimezoneOffset() / 60));
+
+                    // draw time
+                    ctxSubTitle.clearRect(0, 0, 640, 480);
+                    ctxSubTitle.fillStyle = "red";
+                    ctxSubTitle.fillText("motion " + data.Motion, 0, 455);
+                    ctxSubTitle.fillStyle = "white";
+                    ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 480);
+
+                };
+            }
+            else {
                 // convert cameraDate
                 var d = new Date(data.UTCTime + data.TimezoneOffset * 60000);
                 d.setHours(d.getHours() - (d.getTimezoneOffset() / 60));
@@ -36,9 +51,7 @@
                 ctxSubTitle.fillText("motion " + data.Motion, 0, 455);
                 ctxSubTitle.fillStyle = "white";
                 ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 480);
-                //drawText();
-            };
-
+            }
             //ws.close();
         };
 

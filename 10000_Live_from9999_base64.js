@@ -12,6 +12,7 @@ wsSource.on('message', function (data, flags) {
         msg = JSON.parse(data);
         msg.Img = new Buffer(msg.Img).toString('base64');
         wsServer.broadcast(JSON.stringify(msg));
+        console.log(msg.UTCTime);
     }
 });
 

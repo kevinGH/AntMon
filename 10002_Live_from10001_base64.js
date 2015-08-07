@@ -1,7 +1,7 @@
 var WebSocket = require('ws'),
     WebSocketServer = require('ws').Server;
 var wsSource = new WebSocket('ws://localhost:10001');
-var wsServer = new WebSocketServer({ port: 10002 });
+var wsServer = new WebSocketServer({ port : 10002 });
 
 wsSource.on('open', function open() {
     
@@ -12,6 +12,7 @@ wsSource.on('message', function (data, flags) {
         msg = JSON.parse(data);
         msg.Img = new Buffer(msg.Img).toString('base64');
         wsServer.broadcast(JSON.stringify(msg));
+        console.log(msg.UTCTime);
     }
 });
 

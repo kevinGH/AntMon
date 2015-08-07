@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>full</title>
+    <title>dropframebyratio</title>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 </head>
 <body>
@@ -10,7 +10,7 @@
     <script>
         var output, ctx;
         var subtitle, ctxSubTitle;
-        var ws = new WebSocket('ws://localhost:10000');
+        var ws = new WebSocket('ws://localhost:10003');
 
         ws.onopen = function () {
             // Web Socket is connected, send data using send()
