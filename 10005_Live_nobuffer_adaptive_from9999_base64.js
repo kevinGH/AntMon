@@ -5,9 +5,9 @@ var wsServer = new WebSocketServer({ port: 10005 });
 var currentFrameUTCTime = 0;
 var ImgSize = { defaultX: 1280, defaultY: 1024, outputX: 1280, outputY: 1024 };
 var devicesSize = { wearables: { x: 320, y: 240 }, phones: { x: 640, y: 480 }, tablets: { x: 1280, y: 1024 }, laptops: {x: 1280, y: 1024}};
-
+var resolutionAspectRatio;
 var gm = require("gm");
-
+var outputSize = {width: 0, height: 0};
 
 wsSource.on('open', function open() {
 
@@ -18,17 +18,26 @@ wsSource.on('message', function (data, flags) {
         msg = JSON.parse(data);
         currentFrameUTCTime = msg.UTCTime;
 
-        
-        if (ImgSize.defaultX != ImgSize.outputX) {
-            gm(new Buffer(msg.Img)).resize(ImgSize.outputX, ImgSize.ouputY).toBuffer('JPG', function (err, buffer) {
+        //resolutionAspectRatio = msg.Resolution.width / msg.Resolution.height;
+        if (outputSize.width != 0) {
+            msg.Resolution = { width: outputSize.width, height: outputSize.height };
+            msg.MimeType += "base64,";
+
+            gm(new Buffer(msg.Img)).resize(outputSize.width, outputSize.height).gravity('Center').background("#000000").extent(outputSize.width, outputSize.height).toBuffer('JPG', function (err, buffer) {
                 msg.Img = buffer.toString("base64");
+                msg.ImgLength = msg.Img.length;
+                
                 wsServer.broadcast(JSON.stringify(msg));
             });
         }
-        else {
-            msg.Img = new Buffer(msg.Img).toString('base64');
-            wsServer.broadcast(JSON.stringify(msg));
-        }
+        //else {
+        //    msg.Img = new Buffer(msg.Img).toString('base64');
+            
+        //    msg.ImgLength = msg.Img.length;
+        //    msg.MimeType += "base64,";
+
+        //    wsServer.broadcast(JSON.stringify(msg));
+        //}
     }
 });
 
@@ -75,8 +84,14 @@ wsServer.on('connection', function connection(ws) {
             ImgSize.outputX = devicesSize.phones.x;
             ImgSize.outputY = devicesSize.phones.y;
         }
-
-        console.log("x:" + ImgSize.outputX + " y:" + ImgSize.outputY);
+        else {
+            var msg = JSON.parse(message);
+            outputSize.width = msg.width;
+            outputSize.height = msg.height;
+            
+        }
+            
+        //console.log("x:" + ImgSize.outputX + " y:" + ImgSize.outputY);
         //console.log("currentFrameUTCTime:" + currentFrameUTCTime + " feebackUTCTime:" + message.UTCTime);
 
     });
