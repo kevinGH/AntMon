@@ -1,8 +1,8 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>resize320240</title>
-    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <title>full</title>
+    <script src="jquery-2.1.4.min.js"></script>
 </head>
 <body>
     <canvas id="output" width="640" height="480" style="z-index: 100; position:absolute;"></canvas>
@@ -10,7 +10,7 @@
     <script>
         var output, ctx;
         var subtitle, ctxSubTitle;
-        var ws = new WebSocket('ws://localhost:10001');
+        var ws = new WebSocket('ws://10.144.183.151:10000');
 
         ws.onopen = function () {
             // Web Socket is connected, send data using send()
@@ -33,9 +33,9 @@
                 // draw time
                 ctxSubTitle.clearRect(0, 0, 640, 480);
                 ctxSubTitle.fillStyle = "red";
-                ctxSubTitle.fillText("motion " + data.Motion, 0, 228);
+                ctxSubTitle.fillText("motion " + data.Motion, 0, 455);
                 ctxSubTitle.fillStyle = "white";
-                ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 240);
+                ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 480);
                 //drawText();
             };
 

@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>resize320240</title>
+    <title>full</title>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 </head>
 <body>
@@ -10,7 +10,7 @@
     <script>
         var output, ctx;
         var subtitle, ctxSubTitle;
-        var ws = new WebSocket('ws://localhost:10001');
+        var ws = new WebSocket('ws://localhost:10008');
 
         ws.onopen = function () {
             // Web Socket is connected, send data using send()
@@ -33,9 +33,9 @@
                 // draw time
                 ctxSubTitle.clearRect(0, 0, 640, 480);
                 ctxSubTitle.fillStyle = "red";
-                ctxSubTitle.fillText("motion " + data.Motion, 0, 228);
+                ctxSubTitle.fillText("motion " + data.Motion, 0, 455);
                 ctxSubTitle.fillStyle = "white";
-                ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 240);
+                ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 480);
                 //drawText();
             };
 

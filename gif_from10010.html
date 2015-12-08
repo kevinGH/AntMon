@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>full</title>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+</head>
+<body>
+    
+    <script>
+        var output, ctx;
+        var subtitle, ctxSubTitle;
+        var ws = new WebSocket('ws://10.144.183.151:10010');
+
+        function loadImage(path, framecount, width, height, target) {
+            $('<img src="' + path + '" title="' + framecount + '">').load(function () {
+                //$(this).width(width).height(height).appendTo(target);
+                $(this).width(width).height(height).prependTo(target);
+            });
+        }
+
+        ws.onopen = function () {
+            // Web Socket is connected, send data using send()
+            ws.send("Message to send");
+            console.log("Message is sent...");
+        };
+
+        ws.onmessage = function (msg) {
+            data = JSON.parse(msg.data);
+            //console.log(data);
+            loadImage(data.MimeType + data.Img, data.frameCount, 160, 120, "body");
+            //var frame = new Image();            
+            //frame.src = data.MimeType + data.Img;
+            //frame.onload = function () {
+            //    // draw image
+            //    ctx.drawImage(frame, 0, 0, 640, 480);
+
+            //    // convert cameraDate
+            //    var d = new Date(data.UTCTime + data.TimezoneOffset * 60000);
+            //    d.setHours(d.getHours() - (d.getTimezoneOffset() / 60));
+
+            //    // draw time
+            //    ctxSubTitle.clearRect(0, 0, 640, 480);
+            //    ctxSubTitle.fillStyle = "red";
+            //    ctxSubTitle.fillText("motion " + data.Motion, 0, 455);
+            //    ctxSubTitle.fillStyle = "white";
+            //    ctxSubTitle.fillText(d.toLocaleString() + "(" + data.UTCTime + ")", 0, 480);
+            //    //drawText();
+            //};
+
+            //ws.close();
+        };
+
+        ws.onclose = function () {
+            // websocket is closed.
+            console.log("Connection is closed...");
+        };
+
+        $(document).ready(function () {
+            //output = document.getElementById("output");
+            //subtitle = document.getElementById("subtitle");
+            //ctx = output.getContext("2d");
+            //ctxSubTitle = subtitle.getContext("2d");
+            //ctxSubTitle.font = "20px arial";
+            //ctxSubTitle.fillStyle = "white";
+            //ctxSubTitle.shadowOffsetX = 2;
+            //ctxSubTitle.shadowOffsetY = 2;
+            //ctxSubTitle.shadowBlur = 2;
+            //ctxSubTitle.shadowColor = "rgba(0, 0, 0, 0.5)";
+
+        });
+    </script>
+</body>
+</html>

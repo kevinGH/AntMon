@@ -12,7 +12,7 @@ wsSource.on('message', function (data, flags) {
         msg = JSON.parse(data);
         msg.Img = new Buffer(msg.Img).toString('base64');
         wsServer.broadcast(JSON.stringify(msg));
-        console.log(msg.UTCTime);
+        //console.log(msg.UTCTime);
     }
 });
 
@@ -28,6 +28,7 @@ wsServer.on('connection', function connection(ws) {
     ws.on('error', function (edata) {
         console.log('stderr: ' + edata);
     });
+
 });
 wsServer.broadcast = function broadcast(data) {
     wsServer.clients.forEach(function each(client) {

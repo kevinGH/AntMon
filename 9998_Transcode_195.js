@@ -1,8 +1,8 @@
 var spawn = require('child_process').spawn,
     WebSocketServer = require('ws').Server,
-    wss = new WebSocketServer({ port: 9999 }),
-    streamURL = "rtsp://admin:123456@10.144.183.183:80/",
-    ffmpeg = spawn('ffmpeg', ['-i', streamURL, '-loglevel', 'quiet', '-r', '9', '-q:v', '10', '-f', 'image2pipe', '-']),
+    wss = new WebSocketServer({ port: 9998 }),
+    streamURL = "rtsp://admin:123456@10.144.183.195:80/",
+    ffmpeg = spawn('ffmpeg', ['-i', streamURL, '-loglevel', 'quiet', '-q:v', '10', '-f', 'image2pipe', '-']),
     //ffprobe = spawn('ffprobe', ['-v', 'quiet', '-print_format', 'json', '-show_streams', streamURL]),
     probe = require('node-ffprobe');
     //ffmpeg = spawn('ffmpeg', ['-i', 'rtsp://admin:123456@10.144.183.183:80/', '-r', '9', '-q:v', '10', '-f', 'image2pipe', '-']),
@@ -10,7 +10,7 @@ var spawn = require('child_process').spawn,
     buffer = '',
     counter = 0,
     info_streams = {},
-    resolution = { width: 0, height: 0 };
+    resolution = { width: 1280, height: 1024};
 var PNG_HEADER_BUF = new Buffer([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
     PNG_HEADER_STRING = PNG_HEADER_BUF.toString('binary'),
     JPEG_HEADER_BUF = new Buffer([0xff, 0xd8]),
@@ -109,6 +109,7 @@ wss.broadcast = function broadcast(data, timestamp, timezoneOffet, motionValue) 
         ImgLength: data.length,
         Motion: motionValue,
         Resolution: resolution,
+        Location: "",
         MimeType: "data:image/jpg;"
     };
     sendString = JSON.stringify(msg);

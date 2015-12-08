@@ -2,7 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>full</title>
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    
     <style>
         html, body {
             width: 100%;
@@ -104,10 +106,11 @@
     <!--<div id="setting">設定</div>-->
     <!--<div id="setting">設定</div>-->
     <script>
+        
         var output, ctx;
         var subtitle, info, motion, totalframe, totalSize, Framerate, Bitrate, Resolution, Dimensions, MimeType;
         var frameCount = 0, sizeCount = 0, fps = 0, bitrate = 0;
-        var streamhost = "ws://localhost:10005";
+        var streamhost = "ws://10.144.183.151:10007";
         var ws = new WebSocket(streamhost);
 
         var fps = 9;
@@ -122,7 +125,7 @@
         var ts_drawFrame = undefined;
         //var ts_checkResize = undefined;
         var ts_calculateInfo = undefined;
-        
+        var playingTime = 0;
 
 
         ws.onopen = function () {
@@ -242,24 +245,29 @@
         function drawFrame() {
             if (buffer.length > 0) {
                 var data = buffer.pop();
-                var frame = new Image();
-                frame.src = data.MimeType + data.Img;
-                frame.onload = function () {
-                    // draw image
-                    ctx.drawImage(frame, 0, 0, ctx.canvas.width, ctx.canvas.height);
-                    //ctx.drawImage(frame, 0, 0);
 
-                    // convert cameraDate
-                    var d = new Date(data.UTCTime + data.TimezoneOffset * 60000);
-                    d.setHours(d.getHours() - (d.getTimezoneOffset() / 60));
+                if (data.UTCTime > playingTime) { // 防止 chrome browser 畫舊的影像
+                    playingTime = data.UTCTime;
 
-                    
-                    // draw motion
-                    motion.text(data.Motion);
-                    // draw time
-                    subtitle.text(d.toLocaleString());
+                    var frame = new Image();
+                    frame.src = data.MimeType + data.Img;
+                    frame.onload = function () {
+                        // draw image
+                        ctx.drawImage(frame, 0, 0, ctx.canvas.width, ctx.canvas.height);
+                        //ctx.drawImage(frame, 0, 0);
 
-                };
+                        // convert cameraDate
+                        var d = new Date(data.UTCTime + data.TimezoneOffset * 60000);
+                        d.setHours(d.getHours() - (d.getTimezoneOffset() / 60));
+
+
+                        // draw motion
+                        motion.text(data.Motion);
+                        // draw time
+                        subtitle.text(d.toLocaleString());
+
+                    };
+                }
             }
 
             if (ts_drawFrame)
