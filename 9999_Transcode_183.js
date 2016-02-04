@@ -4,13 +4,13 @@ var spawn = require('child_process').spawn,
     streamURL = "rtsp://admin:123456@10.144.183.183:80/",
     ffmpeg = spawn('ffmpeg', ['-i', streamURL, '-loglevel', 'quiet', '-preset', 'ultrafast', '-q:v', '1', '-f', 'image2pipe', '-']),
     //ffprobe = spawn('ffprobe', ['-v', 'quiet', '-print_format', 'json', '-show_streams', streamURL]),
-    probe = require('node-ffprobe');
+    probe = require('node-ffprobe'),
     //ffmpeg = spawn('ffmpeg', ['-i', 'rtsp://admin:123456@10.144.183.183:80/', '-r', '9', '-q:v', '10', '-f', 'image2pipe', '-']),
     //ffmpeg = spawn('ffmpeg', ['-i', 'rtsp://admin:123456@10.144.183.183:80/', '-loglevel', 'quiet', '-q:v', '10', '-f', 'image2pipe', '-vcodec', 'png', '-']),
     buffer = '',
     counter = 0,
     info_streams = {},
-    resolution = { width: 1280, height: 1024};
+    resolution = { width: 1280, height: 1024 };
 var PNG_HEADER_BUF = new Buffer([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
     PNG_HEADER_STRING = PNG_HEADER_BUF.toString('binary'),
     JPEG_HEADER_BUF = new Buffer([0xff, 0xd8]),
@@ -44,7 +44,7 @@ probe(streamURL, function (err, probeData) {
 
 ffmpeg.stdout.on('data', function (data) {
     //console.log(new Date());
-    if (wss.clients.length > 0) { // 有人連進來才處理
+    if (wss.clients.length > 0) { // 嚙踝蕭嚙瘡嚙編嚙箠嚙諉才嚙畿嚙緲
         buffer += data.toString('binary');
 
         // trim to header
@@ -112,9 +112,9 @@ wss.broadcast = function broadcast(data, timestamp, timezoneOffet, motionValue) 
         Location: "",
         MimeType: "data:image/jpg;"
     };
-    
+
     sendString = JSON.stringify(msg);
-    
+
     wss.clients.forEach(function each(client) {
         client.send(sendString, function ack(error) {
             if (error)
